@@ -1,0 +1,123 @@
+CLASSE- Main
+
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) {
+        JogoBatalhaNaval jogo = new JogoBatalhaNaval(2, 2);
+        jogo.iniciarJogo();
+    }
+}
+
+
+CLASSE- JogoBatalhaNaval.java
+
+import java.util.Scanner;
+
+class JogoBatalhaNaval {
+
+    private char[][] tabuleiroNavios;
+    private char[][] tabuleiroVisivel;
+    private int tentativas;
+    private Scanner scanner;
+    private int naviosRestantes;
+
+    public JogoBatalhaNaval(int linhas, int colunas) {
+        tabuleiroNavios = new char[linhas][colunas];
+        tabuleiroVisivel = new char[linhas][colunas];
+        tentativas = 0;
+        scanner = new Scanner(System.in);
+        naviosRestantes = 0; // Inicializado com zero, pois adicionaremos os navios ao colocá-los
+    }
+
+    public void iniciarJogo() {
+        inicializarTabuleiros();
+        exibirTabuleiro(tabuleiroVisivel);
+
+        System.out.print("Informe a quantidade de navios: ");
+        int quantidadeNavios = scanner.nextInt();
+        colocarNavios(tabuleiroNavios, quantidadeNavios);
+
+        while (naviosRestantes > 0) {
+            System.out.print("Informe a linha (0-" + (tabuleiroNavios.length - 1) + "): ");
+            int linha = scanner.nextInt();
+            System.out.print("Informe a coluna (0-" + (tabuleiroNavios[0].length - 1) + "): ");
+            int coluna = scanner.nextInt();
+
+            if (validarJogada(linha, coluna)) {
+                tentativas++;
+            }
+
+            exibirTabuleiro(tabuleiroVisivel);
+        }
+
+        scanner.close();
+        System.out.println("Parabéns! Você afundou todos os navios em " + tentativas + " tentativas.");
+    }
+
+    private void inicializarTabuleiros() {
+        inicializarTabuleiro(tabuleiroNavios);
+        inicializarTabuleiro(tabuleiroVisivel);
+    }
+
+    private void inicializarTabuleiro(char[][] tabuleiro) {
+        for (int i = 0; i < tabuleiro.length; i++) {
+            for (int j = 0; j < tabuleiro[i].length; j++) {
+                tabuleiro[i][j] = '~'; // '~' representa água
+            }
+        }
+    }
+
+    private void exibirTabuleiro(char[][] tabuleiro) {
+        for (int i = 0; i < tabuleiro.length; i++) {
+            for (int j = 0; j < tabuleiro[i].length; j++) {
+                System.out.print(tabuleiro[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    private void colocarNavios(char[][] tabuleiro, int quantidadeNavios) {
+        // Coloque seus navios aleatoriamente no tabuleiro
+        for (int i = 0; i < quantidadeNavios; i++) {
+            int linha, coluna;
+            do {
+                linha = (int) (Math.random() * tabuleiro.length);
+                coluna = (int) (Math.random() * tabuleiro[0].length);
+            } while (tabuleiro[linha][coluna] == 'N'); // Garante que não há sobreposição de navios
+
+            tabuleiro[linha][coluna] = 'N'; // 'N' representa um navio
+            naviosRestantes++;
+        }
+    }
+
+    private boolean validarJogada(int linha, int coluna) {
+        if (linha < 0 || linha >= tabuleiroNavios.length || coluna < 0 || coluna >= tabuleiroNavios[0].length) {
+            System.out.println("Jogada inválida. Tente novamente.");
+            return false;
+        }
+
+        if (tabuleiroVisivel[linha][coluna] == 'X' || tabuleiroVisivel[linha][coluna] == 'O') {
+            System.out.println("Você já jogou nesta posição. Tente novamente.");
+            return false;
+        }
+
+        if (tabuleiroNavios[linha][coluna] == 'N') {
+            System.out.println("Parabéns! Você acertou um navio!");
+            tabuleiroVisivel[linha][coluna] = 'X'; // 'X' representa um acerto
+            naviosRestantes--;
+
+            if (naviosRestantes == 0) {
+                System.out.println("Parabéns! Você afundou todos os navios em " + tentativas + " tentativas.");
+                System.exit(0); // Encerra o programa
+            }
+        } else {
+            System.out.println("Água! Tente novamente.");
+            tabuleiroVisivel[linha][coluna] = 'O'; // 'O' representa uma tentativa de água
+        }
+
+        return true;
+    }
+}
